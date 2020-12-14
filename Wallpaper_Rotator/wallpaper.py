@@ -81,11 +81,11 @@ class Wallpaper:
         if not self.check_persistence():
             self.get_persistence()
         while True:
-            # in case program gets interrupted
             if self.check_time():
                 new_wallpaper = self.get_new_wallpaper()
                 new_wallpaper_path = os.path.join(self.wallpaper_directory, new_wallpaper)
                 self.set_wallpaper(new_wallpaper_path)
                 self.wallpaper_current = new_wallpaper
+            # in case program gets interrupted
             self.save_data()
             time.sleep(self.interval)
