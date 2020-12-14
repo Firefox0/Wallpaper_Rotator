@@ -1,4 +1,5 @@
 import ctypes
+import ctypes.wintypes
 import win32con
 import os
 import random
@@ -20,6 +21,7 @@ class Wallpaper:
             self.ending_time = ending_time
         else:
             self.ending_time = time.time() + self.interval
+        self.MAX_PATH = ctypes.wintypes.MAX_PATH
 
     def check_time(self) -> bool:
         """ Check if it's time to change the wallpaper. """
@@ -42,7 +44,7 @@ class Wallpaper:
 
     def get_current_wallpaper(self) -> str:
         """ Get name of current wallpaper. """
-        buffer = ctypes.create_unicode_buffer(250)
+        buffer = ctypes.create_unicode_buffer(self.MAX_PATH)
         ctypes.windll.user32.SystemParametersInfoW(win32con.SPI_GETDESKWALLPAPER, len(buffer), buffer, 0)
         return os.path.basename(buffer.value)
 
