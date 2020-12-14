@@ -11,6 +11,7 @@ import json
 class Wallpaper:
 
     registry_startup_path = "Software\\Microsoft\\Windows\\CurrentVersion\\Run"
+    MAX_PATH = ctypes.wintypes.MAX_PATH
 
     def __init__(self, wallpaper_directory: str, interval: int, ending_time: int = None):
         self.wallpaper_directory = wallpaper_directory
@@ -21,7 +22,6 @@ class Wallpaper:
             self.ending_time = ending_time
         else:
             self.ending_time = time.time() + self.interval
-        self.MAX_PATH = ctypes.wintypes.MAX_PATH
 
     def check_time(self) -> bool:
         """ Check if it's time to change the wallpaper. """
@@ -56,24 +56,27 @@ class Wallpaper:
         ctypes.windll.user32.SystemParametersInfoW(win32con.SPI_SETDESKWALLPAPER, 0, path, 0)
 
     def check_persistence(self) -> bool:
+        """ Check if program is persistent. """
+        key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, self.registry_startup_path)
         try:
-            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, self.registry_startup_path)
             t = winreg.QueryValueEx(key, "Wallpaper_Rotator")
-            return True
         except Exception as e:
             print(e)
             return False
+        return True
 
     def get_persistence(self) -> None:
-        """ start file on startup """
+        """ Persist program. """
+        key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, self.registry_startup_path)
         try:
-            key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, self.registry_startup_path)
             winreg.SetValueEx(key, "Wallpaper_Rotator", 0, winreg.REG_SZ, f"{os.getcwd()}\\wallpaper_rotator.py")
-            winreg.CloseKey(key)
         except Exception as e:
             print(f"Couldn't get persistence.\n{e}")
+        else:
+            winreg.CloseKey(key)
 
     def save_data(self) -> None:
+        """ Write persistent data to a json file. """
         with open("data.json", "w+") as f:
             d = {"directory": self.wallpaper_directory, "interval": self.interval, "ending_time": self.ending_time}
             json.dump(d, f)
