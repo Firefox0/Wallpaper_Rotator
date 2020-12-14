@@ -2,6 +2,7 @@ import json
 
 
 def load_json(path: str) -> dict:
+    """ Load persistent data. """
     d = {}
     try:
         f = open(path, "r")
