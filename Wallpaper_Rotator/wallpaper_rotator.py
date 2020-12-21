@@ -8,7 +8,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if not (args.directory and args.interval):
         wp = wallpaper.Wallpaper()
-        if d := wp.load_json():
+        d = wp.load_json()
+        if d:
             wp = wallpaper.Wallpaper(d["directory"], d["interval"], d["ending_time"])
             wp.main_loop()
         else:
