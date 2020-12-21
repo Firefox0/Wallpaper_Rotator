@@ -97,10 +97,9 @@ class Wallpaper:
 
     def save_data(self) -> None:
         """ Write persistent data to a json file. """
-        desired_path = f"{self.APPDATA_PATH}\\{self.NAME}"
-        if not os.path.isdir(desired_path):
-            os.mkdir(desired_path)
-        with open(f"{desired_path}\\data.json", "w+") as f:
+        if not os.path.isdir(self.DATA_DIRECTORY):
+            os.mkdir(self.DATA_DIRECTORY)
+        with open(self.DATA_PATH, "w+") as f:
             d = {
                 "directory": self.wallpaper_directory,
                 "interval": self.interval,
