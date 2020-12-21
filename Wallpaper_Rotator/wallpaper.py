@@ -26,6 +26,7 @@ class Wallpaper:
         self.APPDATA_PATH = self.get_appdata_path()
         self.DATA_DIRECTORY = f"{self.APPDATA_PATH}\\{self.NAME}"
         self.DATA_PATH = f"{self.DATA_DIRECTORY}\\data.json"
+        self.MAIN_PY_EXE = f"{os.getcwd()}\\{self.NAME}.py"
 
     def get_appdata_path(self) -> str:
         """ Get path to local appdata. """
@@ -77,7 +78,7 @@ class Wallpaper:
         """ Persist program. """
         key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, self.registry_startup_path)
         try:
-            winreg.SetValueEx(key, self.NAME, 0, winreg.REG_SZ, f"{os.getcwd()}\\{self.NAME}.py")
+            winreg.SetValueEx(key, self.NAME, 0, winreg.REG_SZ, self.MAIN_PY_EXE)
         except Exception as e:
             print(f"Couldn't get persistence: {e}")
         else:
