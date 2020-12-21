@@ -1,5 +1,5 @@
 import ctypes
-import ctypes.wintypes
+import ctypes.wintypes as wintypes
 import win32con
 import os
 import random
@@ -11,9 +11,10 @@ import json
 class Wallpaper:
 
     registry_startup_path = "Software\\Microsoft\\Windows\\CurrentVersion\\Run"
-    MAX_PATH = ctypes.wintypes.MAX_PATH
+    MAX_PATH = wintypes.MAX_PATH
+    NAME = "wallpaper_rotator"
 
-    def __init__(self, wallpaper_directory: str, interval: int, ending_time: int = None):
+    def __init__(self, wallpaper_directory: str = "", interval: int = 0, ending_time: int = 0):
         self.wallpaper_directory = wallpaper_directory
         self.interval = interval
         self.random = random.SystemRandom()
@@ -22,6 +23,14 @@ class Wallpaper:
             self.ending_time = ending_time
         else:
             self.ending_time = time.time() + self.interval
+        self.APPDATA_PATH = self.get_appdata_path()
+        self.DATA_DIRECTORY = f"{self.APPDATA_PATH}\\{self.NAME}"
+        self.DATA_PATH = f"{self.DATA_DIRECTORY}\\data.json"
+
+    def get_appdata_path(self) -> str:
+        """ Get path to local appdata. """
+        username = os.environ.get("USERNAME")
+        return f"C:\\Users\\{username}\\Appdata\\Local"
 
     def check_time(self) -> bool:
         """ Check if it's time to change the wallpaper. """
@@ -59,9 +68,8 @@ class Wallpaper:
         """ Check if program is persistent. """
         key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, self.registry_startup_path)
         try:
-            t = winreg.QueryValueEx(key, "Wallpaper_Rotator")
-        except Exception as e:
-            print(e)
+            t = winreg.QueryValueEx(key, self.NAME)
+        except:
             return False
         return True
 
@@ -69,16 +77,35 @@ class Wallpaper:
         """ Persist program. """
         key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, self.registry_startup_path)
         try:
-            winreg.SetValueEx(key, "Wallpaper_Rotator", 0, winreg.REG_SZ, f"{os.getcwd()}\\wallpaper_rotator.py")
+            winreg.SetValueEx(key, self.NAME, 0, winreg.REG_SZ, f"{os.getcwd()}\\{self.NAME}.py")
         except Exception as e:
-            print(f"Couldn't get persistence.\n{e}")
+            print(f"Couldn't get persistence: {e}")
         else:
             winreg.CloseKey(key)
 
+    def load_json(self) -> dict:
+        """ Load persistent data. """
+        d = {}
+        try:
+            f = open(self.DATA_PATH, "r")
+        except:
+            pass
+        else:
+            d = json.load(f)
+            f.close()
+        return d
+
     def save_data(self) -> None:
         """ Write persistent data to a json file. """
-        with open("data.json", "w+") as f:
-            d = {"directory": self.wallpaper_directory, "interval": self.interval, "ending_time": self.ending_time}
+        desired_path = f"{self.APPDATA_PATH}\\{self.NAME}"
+        if not os.path.isdir(desired_path):
+            os.mkdir(desired_path)
+        with open(f"{desired_path}\\data.json", "w+") as f:
+            d = {
+                "directory": self.wallpaper_directory,
+                "interval": self.interval,
+                "ending_time": self.ending_time
+            }
             json.dump(d, f)
 
     def main_loop(self):
