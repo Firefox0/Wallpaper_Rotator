@@ -6,6 +6,7 @@ import random
 import time
 import winreg
 import json
+import win32gui
 
 
 class Wallpaper:
@@ -27,6 +28,10 @@ class Wallpaper:
         self.DATA_DIRECTORY = f"{self.APPDATA_PATH}\\{self.NAME}"
         self.DATA_PATH = f"{self.DATA_DIRECTORY}\\data.json"
         self.MAIN_PY_PATH = f"{os.getcwd()}\\{self.NAME}.py"
+
+    def hide_window(self):
+        hwnd = win32gui.GetForegroundWindow()
+        win32gui.ShowWindow(hwnd, win32con.SW_HIDE)
 
     def get_appdata_path(self) -> str:
         """ Get path to local appdata. """
@@ -110,6 +115,7 @@ class Wallpaper:
 
     def main_loop(self):
         """ Set new wallpaper whenever interval has passed. """
+        self.hide_window()
         if not self.check_persistence():
             self.get_persistence()
         while True:
