@@ -29,7 +29,8 @@ class Wallpaper:
         self.DATA_PATH = f"{self.DATA_DIRECTORY}\\data.json"
         self.MAIN_PY_PATH = f"{os.getcwd()}\\{self.NAME}.py"
 
-    def hide_window(self):
+    def hide_window(self) -> None:
+        """ Hide window so it just runs in the background. """
         hwnd = win32gui.GetForegroundWindow()
         win32gui.ShowWindow(hwnd, win32con.SW_HIDE)
 
